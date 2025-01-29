@@ -14,17 +14,13 @@ interface ProductDetails {
   location?: string;
 }
 
-interface IpApiResponse {
-  city: string;
-  country: string;
-}
-
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [productDetails, setProductDetails] = useState<ProductDetails | null>(null);
   const [newSavingsAmount, setNewSavingsAmount] = useState<string>('');
   const [isAddingSavings, setIsAddingSavings] = useState(false);
+  const [location, setLocation] = useState<string>('');
 
   useEffect(() => {
     const savedDetails = localStorage.getItem('productDetails');
@@ -36,27 +32,14 @@ const Dashboard = () => {
     setProductDetails(details);
     
     // Get user's location by IP
-    fetch('http://ip-api.com/json/')
+    fetch('https://ipapi.co/json/')
       .then(res => res.json())
-      .then((data: IpApiResponse) => {
-        const location = `${data.city}, ${data.country}`;
-        setProductDetails(prev => prev ? { ...prev, location } : null);
+      .then((data) => {
+        const locationStr = `${data.city || 'Unknown City'}, ${data.country_name || 'Unknown Country'}`;
+        setLocation(locationStr);
       })
       .catch(() => {
-        console.log('Could not fetch location');
-      });
-
-    // Get product price from API (using a mock API for demonstration)
-    fetch(`https://api.rainforestapi.com/request?api_key=demo&type=search&amazon_domain=amazon.com&search_term=${encodeURIComponent(details.name)}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.search_results && data.search_results[0]) {
-          const price = data.search_results[0].price.value;
-          setProductDetails(prev => prev ? { ...prev, price } : null);
-        }
-      })
-      .catch(() => {
-        console.log('Could not fetch price');
+        setLocation('Location unavailable');
       });
   }, [navigate]);
 
@@ -84,7 +67,7 @@ const Dashboard = () => {
       
       setNewSavingsAmount('');
       setIsAddingSavings(false);
-      window.location.reload(); // Refresh to update calculator
+      window.location.reload();
     }
   };
 
@@ -99,8 +82,7 @@ const Dashboard = () => {
               Saving for {productDetails.name}
             </h1>
             <p className="text-neutral-600 mt-2">
-              {productDetails.location && `Shopping from ${productDetails.location}`}
-              {productDetails.price && ` • Estimated price: ${productDetails.price} UAH`}
+              {location && `Shopping from ${location}`}
             </p>
           </div>
           <Dialog open={isAddingSavings} onOpenChange={setIsAddingSavings}>
@@ -143,7 +125,7 @@ const Dashboard = () => {
                 className="w-full h-48 object-cover rounded-lg mb-4"
                 onError={(e) => {
                   const img = e.target as HTMLImageElement;
-                  img.src = `https://source.unsplash.com/featured/?${encodeURIComponent(productDetails.name)}`;
+                  img.src = `https://source.unsplash.com/featured/?${encodeURIComponent(productDetails.name)},electronics`;
                 }}
               />
             )}

@@ -9,11 +9,14 @@ const Setup = () => {
   const { toast } = useToast();
   const [productName, setProductName] = useState('');
   const [productImage, setProductImage] = useState('');
+  const [targetAmount, setTargetAmount] = useState('25000');
+  const [currentAmount, setCurrentAmount] = useState('0');
+  const [deadline, setDeadline] = useState(
+    new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  );
 
   const searchProduct = async () => {
-    // For now, we'll use a placeholder image based on the product name
-    // In a real implementation, this would call an API to fetch product images
-    const placeholderImage = `https://source.unsplash.com/featured/?${encodeURIComponent(productName)}`;
+    const placeholderImage = `https://source.unsplash.com/featured/?${encodeURIComponent(productName)},product`;
     setProductImage(placeholderImage);
   };
 
@@ -27,9 +30,17 @@ const Setup = () => {
       return;
     }
 
+    // Save product details
     localStorage.setItem('productDetails', JSON.stringify({
       name: productName,
       image: productImage,
+    }));
+
+    // Save savings goal
+    localStorage.setItem('savingsGoal', JSON.stringify({
+      targetAmount: Number(targetAmount),
+      currentAmount: Number(currentAmount),
+      deadline: deadline,
     }));
 
     toast({
@@ -73,9 +84,48 @@ const Setup = () => {
                 src={productImage}
                 alt={productName}
                 className="w-full h-48 object-cover rounded-lg"
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement;
+                  img.src = `https://source.unsplash.com/featured/?${encodeURIComponent(productName)},electronics`;
+                }}
               />
             </div>
           )}
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-neutral-700">Target Amount (UAH)</label>
+              <Input
+                type="number"
+                value={targetAmount}
+                onChange={(e) => setTargetAmount(e.target.value)}
+                className="w-full"
+                min="0"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-neutral-700">Current Savings (UAH)</label>
+              <Input
+                type="number"
+                value={currentAmount}
+                onChange={(e) => setCurrentAmount(e.target.value)}
+                className="w-full"
+                min="0"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-neutral-700">Target Date</label>
+              <Input
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                className="w-full"
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+          </div>
 
           <Button type="submit" className="w-full bg-mint-DEFAULT hover:bg-mint-dark">
             Start Saving

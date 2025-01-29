@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { Calculator, Target, Calendar } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Calculator } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
@@ -26,7 +24,6 @@ const SavingsCalculator = () => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    localStorage.setItem('savingsGoal', JSON.stringify(goal));
     const newProgress = (goal.currentAmount / goal.targetAmount) * 100;
     setProgress(newProgress);
 
@@ -38,14 +35,6 @@ const SavingsCalculator = () => {
       });
     }
   }, [goal, progress]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setGoal(prev => ({
-      ...prev,
-      [name]: name === 'currentAmount' || name === 'targetAmount' ? Number(value) : value
-    }));
-  };
 
   const calculateDailySavings = () => {
     const deadlineDate = new Date(goal.deadline);
@@ -59,53 +48,10 @@ const SavingsCalculator = () => {
     <div className="w-full max-w-md mx-auto p-6 bg-white rounded-xl shadow-lg animate-slide-up">
       <h2 className="text-2xl font-display text-neutral-900 mb-6 flex items-center gap-2">
         <Calculator className="w-6 h-6 text-mint-DEFAULT" />
-        Savings Calculator
+        Savings Progress
       </h2>
       
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1">Target Amount (UAH)</label>
-          <div className="relative">
-            <Target className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
-            <Input
-              type="number"
-              name="targetAmount"
-              value={goal.targetAmount}
-              onChange={handleInputChange}
-              className="pl-10"
-              min="0"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1">Current Savings (UAH)</label>
-          <Input
-            type="number"
-            name="currentAmount"
-            value={goal.currentAmount}
-            onChange={handleInputChange}
-            className="w-full"
-            min="0"
-            max={goal.targetAmount}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1">Target Date</label>
-          <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
-            <Input
-              type="date"
-              name="deadline"
-              value={goal.deadline}
-              onChange={handleInputChange}
-              className="pl-10"
-              min={new Date().toISOString().split('T')[0]}
-            />
-          </div>
-        </div>
-
         <div className="mt-6">
           <div className="flex justify-between text-sm text-neutral-600 mb-2">
             <span>Progress</span>
@@ -128,17 +74,20 @@ const SavingsCalculator = () => {
           <p className="text-sm text-neutral-600 mt-1">per day to reach your goal</p>
         </div>
 
-        <Button 
-          className="w-full bg-coral-DEFAULT hover:bg-coral-dark text-white"
-          onClick={() => {
-            toast({
-              title: "Progress Saved!",
-              description: "Keep up the great work!",
-            });
-          }}
-        >
-          Save Progress
-        </Button>
+        <div className="mt-4 space-y-2">
+          <div className="flex justify-between">
+            <span className="text-neutral-600">Target Amount:</span>
+            <span className="font-medium">{goal.targetAmount} UAH</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-neutral-600">Current Savings:</span>
+            <span className="font-medium">{goal.currentAmount} UAH</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-neutral-600">Target Date:</span>
+            <span className="font-medium">{new Date(goal.deadline).toLocaleDateString()}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
