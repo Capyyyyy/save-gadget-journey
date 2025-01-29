@@ -4,6 +4,7 @@ import { Calculator, Target, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 interface SavingsGoal {
   targetAmount: number;
@@ -110,7 +111,13 @@ const SavingsCalculator = () => {
             <span>Progress</span>
             <span>{progress.toFixed(1)}%</span>
           </div>
-          <Progress value={progress} className="h-2 bg-neutral-100" indicatorClassName="bg-mint-DEFAULT animate-progress-fill" />
+          <Progress 
+            value={progress} 
+            className={cn(
+              "h-2 bg-neutral-100",
+              "before:animate-progress-fill"
+            )}
+          />
         </div>
 
         <div className="mt-6 p-4 bg-neutral-50 rounded-lg">
