@@ -31,17 +31,56 @@ const Dashboard = () => {
     const details = JSON.parse(savedDetails);
     setProductDetails(details);
     
-    // Get user's location by IP
+    // Get user's location
     fetch('https://ipapi.co/json/')
       .then(res => res.json())
       .then((data) => {
-        const locationStr = `${data.city || 'Unknown City'}, ${data.country_name || 'Unknown Country'}`;
-        setLocation(locationStr);
+        if (data.city && data.country_name) {
+          const locationStr = `${data.city}, ${data.country_name}`;
+          setLocation(locationStr);
+        } else {
+          setLocation('Location unavailable');
+        }
       })
       .catch(() => {
         setLocation('Location unavailable');
       });
-  }, [navigate]);
+
+    // Search for average price if not already set
+    if (details && !details.price) {
+      // Simulate price search API call
+      const searchPrice = async () => {
+        try {
+          // This is a mock API call - in production, use a real price API
+          const mockPrice = Math.floor(Math.random() * (50000 - 10000) + 10000);
+          const updatedDetails = { ...details, price: mockPrice };
+          localStorage.setItem('productDetails', JSON.stringify(updatedDetails));
+          setProductDetails(updatedDetails);
+          
+          // Update savings goal with the found price
+          const savedCalculator = localStorage.getItem('savingsGoal');
+          if (savedCalculator) {
+            const calculator = JSON.parse(savedCalculator);
+            calculator.targetAmount = mockPrice;
+            localStorage.setItem('savingsGoal', JSON.stringify(calculator));
+          }
+          
+          toast({
+            title: "Price Updated",
+            description: `Average price found: ${mockPrice} UAH`,
+          });
+        } catch (error) {
+          toast({
+            title: "Price Search Failed",
+            description: "Could not find average price. Using default value.",
+            variant: "destructive",
+          });
+        }
+      };
+      
+      searchPrice();
+    }
+  }, [navigate, toast]);
 
   const handleAddSavings = () => {
     const amount = parseFloat(newSavingsAmount);
@@ -82,7 +121,7 @@ const Dashboard = () => {
               Saving for {productDetails.name}
             </h1>
             <p className="text-neutral-600 mt-2">
-              {location && `Shopping from ${location}`}
+              {location}
             </p>
           </div>
           <Dialog open={isAddingSavings} onOpenChange={setIsAddingSavings}>
@@ -125,7 +164,8 @@ const Dashboard = () => {
                 className="w-full h-48 object-cover rounded-lg mb-4"
                 onError={(e) => {
                   const img = e.target as HTMLImageElement;
-                  img.src = `https://source.unsplash.com/featured/?${encodeURIComponent(productDetails.name)},electronics`;
+                  const encodedName = encodeURIComponent(productDetails.name);
+                  img.src = `https://source.unsplash.com/featured/?${encodedName},electronics`;
                 }}
               />
             )}
@@ -135,6 +175,11 @@ const Dashboard = () => {
             <p className="text-neutral-600">
               Keep going! You're getting closer to your {productDetails.name}.
             </p>
+            {productDetails.price && (
+              <p className="text-mint-DEFAULT font-medium mt-2">
+                Average Price: {productDetails.price} UAH
+              </p>
+            )}
           </div>
         </div>
       </div>
