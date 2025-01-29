@@ -42,6 +42,8 @@ export default {
           800: "#3C4043",
           900: "#202124",
         },
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
       },
       fontFamily: {
         sans: ["Roboto", "sans-serif"],
